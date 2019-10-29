@@ -1,0 +1,26 @@
+{
+  "development": {
+    "username": "hashtag",
+    "password": "moaRFMy732U*",
+    "database": "hashtag",
+    "host": "hashtag-db.cjqzfx4sgk8f.us-west-1.rds.amazonaws.com",
+    "dialect": "postgres",
+    "operatorsAliases": false
+  },
+  "test": {
+    "username": "hashtag",
+    "password": "moaRFMy732U*",
+    "database": "hashtag",
+    "host": "hashtag-db.cjqzfx4sgk8f.us-west-1.rds.amazonaws.com",
+    "dialect": "postgres",
+    "operatorsAliases": false
+  },
+  "production": {
+    "username": "hashtag",
+    "password": "moaRFMy732U*",
+    "database": "hashtag",
+    "host": "hashtag-db.cjqzfx4sgk8f.us-west-1.rds.amazonaws.com",
+    "dialect": "postgres",
+    "operatorsAliases": false
+  }
+}

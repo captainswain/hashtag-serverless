@@ -1,0 +1,8 @@
+{
+    "DB_NAME": "hashtag-db",
+    "DB_USER": "hashtag",
+    "DB_PASSWORD": "moaRFMy732U*",
+    "DB_HOST": "hashtag-db.cjqzfx4sgk8f.us-west-1.rds.amazonaws.com",
+    "DB_PORT": 5432,
+    "NODE_ENV": "development"
+  }

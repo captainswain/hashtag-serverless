@@ -1,0 +1,32 @@
+service: hashtag
+app: hashtag-app
+org: swain
+
+provider:
+  name: aws
+  runtime: nodejs10.x
+  environment:
+    NODE_ENV: ${self:custom.config.NODE_ENV}
+    DB_NAME: ${self:custom.config.DB_NAME}
+    DB_USER: ${self:custom.config.DB_USER}
+    DB_PASSWORD: ${self:custom.config.DB_PASSWORD}
+    DB_HOST: ${self:custom.config.DB_HOST}
+    DB_PORT: ${self:custom.config.DB_PORT}
+
+functions:
+  hello:
+    handler: handler.hello
+    events:
+      - http:
+          path: hello
+          method: get
+          cors: true
+  register:
+    handler: handler.register
+    events:
+      - http:
+          path: register
+          method: post
+          cors: true
+plugins:
+  - serverless-offline
