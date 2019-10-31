@@ -1,5 +1,5 @@
 'use strict';
-var bcrypt = require('bcrypt');
+var bcrypt = require('bcryptjs');
 
 
 module.exports = (sequelize, DataTypes) => {
@@ -12,13 +12,8 @@ module.exports = (sequelize, DataTypes) => {
       user.password = bcrypt.hashSync(user.password, bcrypt.genSaltSync(10), null);
     }
   });
-  User.prototype.comparePassword = function (passw, cb) {
-    bcrypt.compare(passw, this.password, function (err, isMatch) {
-        if (err) {
-            return cb(err);
-        }
-        cb(null, isMatch);
-    });
+  User.prototype.comparePassword = function (pass) {
+    return bcrypt.compareSync(pass, this.password);
   };
   User.associate = function(models) {
     // associations can be defined here

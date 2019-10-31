@@ -1,0 +1,29 @@
+{
+  "name": "hashtag",
+  "version": "1.0.0",
+  "description": "",
+  "main": "User.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/captainswain/hashtag-serverless.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/captainswain/hashtag-serverless/issues"
+  },
+  "homepage": "https://github.com/captainswain/hashtag-serverless#readme",
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "jsonwebtoken": "^8.5.1",
+    "node": "^10.16.0",
+    "pg": "^7.12.1",
+    "sequelize": "^5.21.2"
+  },
+  "devDependencies": {
+    "serverless-offline": "^5.12.0"
+  }
+}

@@ -1,17 +1,20 @@
 service: hashtag
-app: hashtag-app
 org: swain
 
 provider:
   name: aws
   runtime: nodejs10.x
+  region: us-west-1
+  vpc:
+    securityGroupIds:
+      - sg-5533302a
+    subnetIds:
+      - subnet-95908ece
+      - subnet-b66aa8d0
   environment:
-    NODE_ENV: ${self:custom.config.NODE_ENV}
-    DB_NAME: ${self:custom.config.DB_NAME}
-    DB_USER: ${self:custom.config.DB_USER}
-    DB_PASSWORD: ${self:custom.config.DB_PASSWORD}
-    DB_HOST: ${self:custom.config.DB_HOST}
-    DB_PORT: ${self:custom.config.DB_PORT}
+    JWT_SECRET: T97Oid2OhcGVhq2u2qsop9XIRHZlkgMlzhUA2TdUWgw
+    JWT_EXPIRATION_TIME: 1h
+    
 
 functions:
   hello:
@@ -20,6 +23,7 @@ functions:
       - http:
           path: hello
           method: get
+          authorizer: authorize
           cors: true
   register:
     handler: handler.register
@@ -28,5 +32,15 @@ functions:
           path: register
           method: post
           cors: true
+  login:
+    handler: handler.login
+    events:
+      - http:
+          path: login
+          method: post
+          cors: true
+  authorize:
+    handler: handler.authorize
+    
 plugins:
   - serverless-offline

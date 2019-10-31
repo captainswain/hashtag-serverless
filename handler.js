@@ -1,21 +1,17 @@
 'use strict';
 
+var jwt = require('jsonwebtoken');
+
 const User = require('./models').User;
 
 
-module.exports.hello = async event => {
+
+module.exports.hello = async (event) => {
   return {
     statusCode: 200,
-    body: JSON.stringify(
-      {
-        message: 'Go Serverless v1.0! Your function executed successfully!'
-      },
-      null,
-      2
-    ),
-  };
-
-};
+    body: JSON.stringify("Hello, I'm protected!")
+  }
+}
 
 module.exports.register = async (event) => {
   try {
@@ -29,19 +25,119 @@ module.exports.register = async (event) => {
       statusCode: 500,
       body: JSON.stringify(
         {
-          error: 'error creating account',
-          e : err
+          error: 'error creating account'
         },
         null,
         2
       ),
     };
-  
+
   }
 }
 
-function HTTPError (statusCode, message) {
-  const error = new Error(message)
-  error.statusCode = statusCode
-  return error
+
+module.exports.login = async (event) => {
+  try {
+    let request = JSON.parse(event.body)
+
+    const user = await User.findOne({ where: { username: request.username } })
+
+    // Check if user exists
+    if (!user) {
+      return {
+        statusCode: 404,
+        body: JSON.stringify({
+          error: 'user not found'
+        })
+      }
+    }
+
+    if (!user.comparePassword(request.password)) {
+      return {
+        statusCode: 403,
+        body: JSON.stringify({
+          error: 'Invalid password.'
+        })
+      }
+
+    }
+
+    var token = jwt.sign({
+      user
+    }, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRATION_TIME });
+
+    return {
+      statusCode: 200,
+      body: JSON.stringify({
+        data: {
+          'token': token
+        }
+      })
+    }
+  } catch (err) {
+    return {
+      statusCode: 500,
+      body: JSON.stringify(
+        {
+          error: 'error logging in'
+        },
+        null,
+        2
+      ),
+    };
+
+  }
 }
+
+
+// Policy helper function
+// https://github.com/serverless/examples/blob/master/aws-node-auth0-custom-authorizers-api/handler.js
+const generatePolicy = (principalId, effect, resource) => {
+  const authResponse = {};
+  authResponse.principalId = principalId;
+  if (effect && resource) {
+    const policyDocument = {};
+    policyDocument.Version = '2012-10-17';
+    policyDocument.Statement = [];
+    const statementOne = {};
+    statementOne.Action = 'execute-api:Invoke';
+    statementOne.Effect = effect;
+    statementOne.Resource = resource;
+    policyDocument.Statement[0] = statementOne;
+    authResponse.policyDocument = policyDocument;
+  }
+  return authResponse;
+};
+
+module.exports.authorize = (event, context, callback) => {
+  const token = event.authorizationToken;
+
+  if (!token) {
+    return callback('Unauthorized');
+  }
+  const tokenParts = token.split(' ');
+
+  const tokenValue = tokenParts[1];
+
+  if (!(tokenParts[0].toLowerCase() === 'bearer' && tokenValue)) {
+    // no auth token!
+    return callback('Unauthorized');
+  }
+
+  try {
+    // Verify JWT
+    jwt.verify(tokenValue, process.env.JWT_SECRET, (verifyError, decoded) =>{
+      if (verifyError) {
+        console.log('verifyError', verifyError);
+        // 401 Unauthorizeds
+        console.log(`Token invalid. ${verifyError}`);
+        return callback('Unauthorized');
+      }
+      return callback(null, generatePolicy(decoded.user.username, 'Allow', event.methodArn));
+    });
+
+  } catch (e) {
+    callback('Unauthorized'); 
+  }
+};
+
