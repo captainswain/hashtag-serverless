@@ -25,6 +25,14 @@ functions:
           method: get
           authorizer: authorize
           cors: true
+  user:
+    handler: handler.user
+    events:
+      - http:
+          path: user
+          method: get
+          authorizer: authorize
+          cors: true  
   register:
     handler: handler.register
     events:

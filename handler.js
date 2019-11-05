@@ -12,7 +12,13 @@ module.exports.hello = async (event) => {
     body: JSON.stringify("Hello, I'm protected!")
   }
 }
+module.exports.user = async (event, context) => {
+      return {
+        statusCode: 200,
+        body: JSON.stringify({'data': {'user' : {'id' : event.requestContext.authorizer.claims.user.id, 'username' : event.requestContext.authorizer.claims.user.username }}})
+      }
 
+}
 module.exports.register = async (event) => {
   try {
     const user = await User.create(JSON.parse(event.body))
@@ -25,7 +31,7 @@ module.exports.register = async (event) => {
       statusCode: 500,
       body: JSON.stringify(
         {
-          error: 'error creating account'
+          error: 'error registering account'
         },
         null,
         2
