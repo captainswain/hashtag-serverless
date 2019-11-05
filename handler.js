@@ -4,18 +4,34 @@ var jwt = require('jsonwebtoken');
 
 const User = require('./models').User;
 
-
+const middy = require('middy')
+const { cors } = require('middy/middlewares')
 
 module.exports.hello = async (event) => {
   return {
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Credentials': true
+    },
     statusCode: 200,
     body: JSON.stringify("Hello, I'm protected!")
   }
 }
 module.exports.user = async (event, context) => {
+    // body: JSON.stringify({'data': {'user' : {'id' : event.requestContext.authorizer.claims.user.id, 'username' : event.requestContext.authorizer.claims.user.username }}})
+
+      var userName = event.requestContext.authorizer.principalId
+      const user = await User.findOne({ where: { username: userName } })
+
+      console.log(event)
       return {
+        headers: {
+          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Credentials': true
+        },
         statusCode: 200,
-        body: JSON.stringify({'data': {'user' : {'id' : event.requestContext.authorizer.claims.user.id, 'username' : event.requestContext.authorizer.claims.user.username }}})
+    body: JSON.stringify({'data': {'user' : {'id' : user.id, 'username' :user.username }}})
+
       }
 
 }
@@ -23,11 +39,19 @@ module.exports.register = async (event) => {
   try {
     const user = await User.create(JSON.parse(event.body))
     return {
+      headers: {
+        "Access-Control-Allow-Origin" : "*",
+        'Access-Control-Allow-Credentials': true
+      },
       statusCode: 200,
       body: JSON.stringify(user)
     }
   } catch (err) {
     return {
+      headers: {
+        "Access-Control-Allow-Origin" : "*",
+        'Access-Control-Allow-Credentials': true
+      },
       statusCode: 500,
       body: JSON.stringify(
         {
@@ -51,6 +75,10 @@ module.exports.login = async (event) => {
     // Check if user exists
     if (!user) {
       return {
+        headers: {
+          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Credentials': true
+        },
         statusCode: 404,
         body: JSON.stringify({
           error: 'user not found'
@@ -60,6 +88,10 @@ module.exports.login = async (event) => {
 
     if (!user.comparePassword(request.password)) {
       return {
+        headers: {
+          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Credentials': true
+        },
         statusCode: 403,
         body: JSON.stringify({
           error: 'Invalid password.'
@@ -73,6 +105,10 @@ module.exports.login = async (event) => {
     }, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRATION_TIME });
 
     return {
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Credentials': true
+      },
       statusCode: 200,
       body: JSON.stringify({
         data: {
@@ -82,6 +118,10 @@ module.exports.login = async (event) => {
     }
   } catch (err) {
     return {
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Credentials': true
+      },
       statusCode: 500,
       body: JSON.stringify(
         {

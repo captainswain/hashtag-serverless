@@ -19,6 +19,7 @@
   "dependencies": {
     "bcryptjs": "^2.4.3",
     "jsonwebtoken": "^8.5.1",
+    "middy": "^0.30.4",
     "node": "^10.16.0",
     "pg": "^7.12.1",
     "sequelize": "^5.21.2"

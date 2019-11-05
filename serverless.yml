@@ -1,4 +1,4 @@
-service: hashtag
+service: hashtag-app
 org: swain
 
 provider:
@@ -49,6 +49,10 @@ functions:
           cors: true
   authorize:
     handler: handler.authorize
-    
+
+resources:
+  # API Gateway Errors
+  - ${file(resources/api-gateway-errors.yml)}
+
 plugins:
   - serverless-offline
