@@ -47,6 +47,34 @@ functions:
           path: login
           method: post
           cors: true
+  jobs:
+    handler: handler.getJobs
+    events:
+      - http:
+          path: jobs
+          method: get
+          authorizer: authorize
+          cors: true
+  jobById:
+    handler: handler.getJobByID
+    events:
+      - http:
+          path: jobs/{id}
+          method: get
+          authorizer: authorize
+          cors: true
+          request:
+            parameters:
+              paths:
+                id: true
+  Createjobs:
+    handler: handler.submitJob
+    events:
+      - http:
+          path: jobs
+          method: post
+          authorizer: authorize
+          cors: true
   authorize:
     handler: handler.authorize
 

@@ -3,9 +3,9 @@
 var jwt = require('jsonwebtoken');
 
 const User = require('./models').User;
+const Jobs = require('./models').Jobs;
+const Results = require('./models').Results;
 
-const middy = require('middy')
-const { cors } = require('middy/middlewares')
 
 module.exports.hello = async (event) => {
   return {
@@ -18,29 +18,99 @@ module.exports.hello = async (event) => {
   }
 }
 module.exports.user = async (event, context) => {
-    // body: JSON.stringify({'data': {'user' : {'id' : event.requestContext.authorizer.claims.user.id, 'username' : event.requestContext.authorizer.claims.user.username }}})
+  var userName = event.requestContext.authorizer.principalId
+  const user = await User.findOne({ where: { username: userName } })
 
-      var userName = event.requestContext.authorizer.principalId
-      const user = await User.findOne({ where: { username: userName } })
+  console.log(event)
+  return {
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Credentials': true
+    },
+    statusCode: 200,
+    body: JSON.stringify({ 'data': { 'user': { 'id': user.id, 'username': user.username } } })
 
-      console.log(event)
-      return {
-        headers: {
-          'Access-Control-Allow-Origin': '*',
-          'Access-Control-Allow-Credentials': true
+  }
+
+}
+module.exports.getJobByID = async (event, context) => {
+  var id = event.pathParameters.id;
+  console.log(id);
+  const job = await Jobs.findOne({ where: { id: id }})
+
+  return {
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Credentials': true
+    },
+    statusCode: 200,
+    body: JSON.stringify({ 'data': { 'job': job } })
+
+  }
+
+}
+module.exports.getJobs = async (event, context) => {
+  var userName = event.requestContext.authorizer.principalId
+  const user = await User.findOne({ where: { username: userName }, include: 'jobs' })
+
+
+  console.log(user.jobs)
+  return {
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Credentials': true
+    },
+    statusCode: 200,
+    body: JSON.stringify({ 'data': { 'user': { 'id': user.id, 'jobs': user.jobs } } })
+
+  }
+
+}
+module.exports.submitJob = async (event, context) => {
+  try {
+    var userName = event.requestContext.authorizer.principalId
+    const user = await User.findOne({ where: { username: userName } })
+    var body = JSON.parse(event.body)
+    const job = await Jobs.create({
+      location: body.location,
+      location_id: body.location_id,
+      status: 0,
+      user_id: user.id
+    })
+    return {
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+        'Access-Control-Allow-Credentials': true
+      },
+      statusCode: 200,
+      body: JSON.stringify(job)
+    }
+  } catch (err) {
+
+    console.log(err)
+    return {
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+        'Access-Control-Allow-Credentials': true
+      },
+      statusCode: 500,
+      body: JSON.stringify(
+        {
+          error: 'error creating job.'
         },
-        statusCode: 200,
-    body: JSON.stringify({'data': {'user' : {'id' : user.id, 'username' :user.username }}})
+        null,
+        2
+      ),
+    };
 
-      }
-
+  }
 }
 module.exports.register = async (event) => {
   try {
     const user = await User.create(JSON.parse(event.body))
     return {
       headers: {
-        "Access-Control-Allow-Origin" : "*",
+        "Access-Control-Allow-Origin": "*",
         'Access-Control-Allow-Credentials': true
       },
       statusCode: 200,
@@ -49,7 +119,7 @@ module.exports.register = async (event) => {
   } catch (err) {
     return {
       headers: {
-        "Access-Control-Allow-Origin" : "*",
+        "Access-Control-Allow-Origin": "*",
         'Access-Control-Allow-Credentials': true
       },
       statusCode: 500,
@@ -172,18 +242,18 @@ module.exports.authorize = (event, context, callback) => {
 
   try {
     // Verify JWT
-    jwt.verify(tokenValue, process.env.JWT_SECRET, (verifyError, decoded) =>{
+    jwt.verify(tokenValue, process.env.JWT_SECRET, (verifyError, decoded) => {
       if (verifyError) {
         console.log('verifyError', verifyError);
         // 401 Unauthorizeds
         console.log(`Token invalid. ${verifyError}`);
         return callback('Unauthorized');
       }
-      return callback(null, generatePolicy(decoded.user.username, 'Allow', event.methodArn));
+      return callback(null, generatePolicy(decoded.user.username, 'Allow', '*'));
     });
 
   } catch (e) {
-    callback('Unauthorized'); 
+    callback('Unauthorized');
   }
 };
 
