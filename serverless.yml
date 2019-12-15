@@ -12,7 +12,7 @@ provider:
       - subnet-95908ece
       - subnet-b66aa8d0
   environment:
-    JWT_SECRET: T97Oid2OhcGVhq2u2qsop9XIRHZlkgMlzhUA2TdUWgw
+    JWT_SECRET: ThIsIsSoSeCrEtChAnGeMePlEaSe
     JWT_EXPIRATION_TIME: 1h
     
 
